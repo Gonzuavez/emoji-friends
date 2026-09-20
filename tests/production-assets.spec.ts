@@ -25,6 +25,7 @@ test('canonical production paths and voice identity are configured', async () =>
   expect(bruno.branding).toBe('Bruno paw-heart');
   expect(bruno.voice).toMatchObject({ name: 'BRUNOJI', provider: 'heygen', id: 'M9QQyAAoUtDSmALeZnRw', language: 'en' });
   expect(bruno.image).toBe('/characters/bruno/bruno.png');
+  expect(bruno.poseImages?.peek).toBe('/characters/bruno/poses/bruno-rising.png');
   expect(brunoThinkingOfYou.audio).toEqual({
     recognition: '/audio/bruno-recognition.mp3', introduction: '/audio/bruno-introduction.mp3',
     message: '/audio/bruno-message.mp3', exit: '/audio/bruno-exit.mp3',
@@ -230,7 +231,14 @@ test('standalone Bruno poses overlap briefly instead of hard-swapping', async ({
   await expect(page.locator('.character-art--outgoing')).toHaveAttribute('src', '/characters/bruno/poses/bruno-peek.png');
   await expect(page.locator('.character-layer')).toHaveAttribute('data-transitioning', 'true');
 
-  await page.clock.runFor(350);
+  await page.clock.runFor(460);
   await expect(page.locator('.character-art--outgoing')).toHaveCount(0);
   await expect(page.locator('.character-layer')).toHaveAttribute('data-transitioning', 'false');
+
+  const eyesRiseIndex = timeline.findIndex(step => step.id === 'eyesRise');
+  await page.clock.runFor(durationFor(eyesRiseIndex, brunoThinkingOfYou) - 460);
+  await expect(page.locator('main')).toHaveAttribute('data-phase', 'peek');
+  await expect(current).toHaveAttribute('src', '/characters/bruno/poses/bruno-rising.png');
+  await expect(page.locator('.character-art--outgoing')).toHaveCount(0);
+  await expect(page.locator('.character-layer')).toHaveAttribute('data-from-pose', 'eyesRise');
 });
