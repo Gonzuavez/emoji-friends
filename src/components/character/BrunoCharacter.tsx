@@ -1,20 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { BrunoPose } from '../../config/characters/bruno';
 import type { Gift } from '../../config/gifts/brunoThinkingOfYou';
 import type { Phase } from '../../experiences/BrunoThinkingOfYou/timeline';
 
-/** Production asset adapter. Each performance beat selects exactly one
- * standalone Bruno PNG; pose files are preloaded so swaps do not flash blank. */
+type DisplayFrame = {
+  image: string;
+  pose: Phase;
+};
+
+const POSE_BLEND_MS = 320;
+const hiddenPhases = new Set<Phase>(['idle', 'opening', 'knock1', 'knock2', 'knock3', 'cta']);
+
+function isVisiblePhase(phase: Phase) {
+  return !hiddenPhases.has(phase);
+}
+
+/** Production asset adapter.
+ * Motion Pass #1 keeps two standalone PNG layers only during a pose change:
+ * the prior pose fades away while the next preloaded pose eases into place.
+ * No sprite sheets, crops, or generated in-between artwork are used. */
 export function BrunoCharacter({ phase, character, prop }: { phase: Phase; character: Gift['character']; prop: Gift['prop'] }) {
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
   const [loadedUrls, setLoadedUrls] = useState<Set<string>>(new Set());
-  const [displayImage, setDisplayImage] = useState<string | undefined>(character.image);
+  const [activeFrame, setActiveFrame] = useState<DisplayFrame | null>(
+    () => character.image ? { image: character.image, pose: phase } : null,
+  );
+  const [outgoingFrame, setOutgoingFrame] = useState<DisplayFrame | null>(null);
+  const transitionTimer = useRef<number | null>(null);
 
   const pose = phase as BrunoPose;
-  const visible = !['idle', 'opening', 'knock1', 'knock2', 'knock3', 'cta'].includes(phase);
+  const visible = isVisiblePhase(phase);
   const poseImage = character.poseImages?.[pose];
-  // The base image is allowed only outside a configured performance pose.
-  // A missing/broken performance pose never falls back to the old master art.
+  // The base image is allowed outside the performance. A configured
+  // performance pose never falls back to the old master/composite artwork.
   const desiredImage = poseImage ?? character.image;
 
   const markLoaded = (url: string) => setLoadedUrls(previous => {
@@ -30,8 +48,8 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
     return next;
   });
 
-  // Warm the browser cache as soon as the gift page mounts. The opening/knock
-  // beats give the clean pose pack time to decode before Bruno becomes visible.
+  // Warm every Bruno pose while the opening/knock beats play. This keeps the
+  // blend visual rather than exposing network/decode delays between poses.
   useEffect(() => {
     const urls = [
       character.image,
@@ -56,54 +74,129 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
     };
   }, [character.image, character.poseImages]);
 
-  // Never clear the currently visible pose while the next PNG is decoding.
-  // Once ready, swap the single <img> source atomically.
+  useEffect(() => () => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+  }, []);
+
+  // Commit a new pose only after its standalone PNG has decoded. For a real
+  // pose-to-pose change, retain the prior image for a short crossfade window.
   useEffect(() => {
     if (!desiredImage) {
-      setDisplayImage(undefined);
-      return;
-    }
-    if (failedUrls.has(desiredImage)) {
-      if (poseImage) setDisplayImage(undefined);
-      return;
-    }
-    if (loadedUrls.has(desiredImage)) {
-      setDisplayImage(desiredImage);
+      setActiveFrame(null);
+      setOutgoingFrame(null);
       return;
     }
 
-    let active = true;
+    if (failedUrls.has(desiredImage)) {
+      setActiveFrame(null);
+      setOutgoingFrame(null);
+      return;
+    }
+
+    let effectActive = true;
+
+    const commit = () => {
+      if (!effectActive) return;
+
+      if (activeFrame?.image === desiredImage) {
+        if (activeFrame.pose !== phase) {
+          // Same artwork can represent more than one beat (for example turn /
+          // depart). Re-key it by pose so that beat-specific motion restarts.
+          setActiveFrame({ image: desiredImage, pose: phase });
+        }
+        return;
+      }
+
+      const canBlend = Boolean(activeFrame && visible && isVisiblePhase(activeFrame.pose));
+      setOutgoingFrame(canBlend ? activeFrame : null);
+      setActiveFrame({ image: desiredImage, pose: phase });
+
+      if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+      if (canBlend) {
+        transitionTimer.current = window.setTimeout(() => {
+          setOutgoingFrame(null);
+          transitionTimer.current = null;
+        }, POSE_BLEND_MS);
+      }
+    };
+
+    if (loadedUrls.has(desiredImage)) {
+      commit();
+      return () => {
+        effectActive = false;
+      };
+    }
+
     const preload = new Image();
     preload.onload = () => {
-      if (!active) return;
+      if (!effectActive) return;
       markLoaded(desiredImage);
-      setDisplayImage(desiredImage);
+      commit();
     };
     preload.onerror = () => {
-      if (!active) return;
+      if (!effectActive) return;
       markFailed(desiredImage);
-      if (poseImage) setDisplayImage(undefined);
+      setActiveFrame(null);
+      setOutgoingFrame(null);
     };
     preload.src = desiredImage;
-    return () => {
-      active = false;
-    };
-  }, [desiredImage, poseImage, loadedUrls, failedUrls]);
 
-  const image = displayImage && !failedUrls.has(displayImage) ? displayImage : undefined;
-  const failed = !image || failedUrls.has(image);
-  const loaded = !!image && loadedUrls.has(image);
+    return () => {
+      effectActive = false;
+    };
+  }, [desiredImage, phase, visible, activeFrame, loadedUrls, failedUrls]);
+
+  const suppressBaseDuringPose = Boolean(
+    visible && poseImage && activeFrame?.image === character.image,
+  );
+  const activeImage = activeFrame
+    && !suppressBaseDuringPose
+    && loadedUrls.has(activeFrame.image)
+    && !failedUrls.has(activeFrame.image)
+    ? activeFrame.image
+    : undefined;
+  const outgoingImage = outgoingFrame
+    && loadedUrls.has(outgoingFrame.image)
+    && !failedUrls.has(outgoingFrame.image)
+    ? outgoingFrame.image
+    : undefined;
+
+  const targetFailed = !desiredImage || failedUrls.has(desiredImage);
+  const hasProductionFrame = Boolean(activeImage || outgoingImage);
+  const productionPending = Boolean(desiredImage && !targetFailed);
+  const showFallback = targetFailed && !hasProductionFrame;
   const showProp = prop && prop.showDuring.includes(pose) && !failedUrls.has(prop.image);
   const onFailure = (url: string) => markFailed(url);
 
-  return <div className={`character-layer ${visible ? 'is-visible' : ''}`} data-pose={phase} data-asset={loaded && !failed ? 'production' : 'fallback'} aria-hidden="true">
+  return <div
+    className={`character-layer ${visible ? 'is-visible' : ''}`}
+    data-pose={phase}
+    data-asset={hasProductionFrame || productionPending ? 'production' : 'fallback'}
+    data-transitioning={outgoingImage ? 'true' : 'false'}
+    aria-hidden="true"
+  >
     <div className="character-aura" />
     <div className="glass-contact glass-contact-left" />
     <div className="glass-contact glass-contact-right" />
     <div className="glass-paw"><i /><i /><i /><i /><b /></div>
     <div className="bear">
-      {image && !failed && <img className={`character-art ${loaded ? 'is-loaded' : 'is-loading'}`} key={image} src={image} alt="" onLoad={() => markLoaded(image)} onError={() => onFailure(image)} />}
-      {(!loaded || failed) && <svg viewBox="0 0 320 360" className="placeholder" fill="none">
+      {outgoingImage && outgoingFrame && <img
+        className="character-art character-art--outgoing"
+        key={`outgoing:${outgoingFrame.image}:${outgoingFrame.pose}`}
+        src={outgoingImage}
+        data-image-pose={outgoingFrame.pose}
+        alt=""
+        onError={() => onFailure(outgoingImage)}
+      />}
+      {activeImage && activeFrame && <img
+        className="character-art character-art--current"
+        key={`current:${activeFrame.image}:${activeFrame.pose}`}
+        src={activeImage}
+        data-image-pose={activeFrame.pose}
+        alt=""
+        onError={() => onFailure(activeImage)}
+      />}
+      {showFallback && <svg viewBox="0 0 320 360" className="placeholder" fill="none">
           <defs><linearGradient id="fur" x1="70" y1="20" x2="260" y2="360" gradientUnits="userSpaceOnUse"><stop stopColor="#95816a" /><stop offset="1" stopColor="#3c3932" /></linearGradient></defs>
           <ellipse cx="160" cy="303" rx="104" ry="105" fill="url(#fur)" />
           <circle cx="79" cy="88" r="38" fill="url(#fur)" /><circle cx="241" cy="88" r="38" fill="url(#fur)" />
@@ -117,6 +210,6 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
         </svg>}
       {showProp && <img className="emotional-prop" src={prop.image} alt="" data-description={prop.description} onError={() => onFailure(prop.image)} />}
     </div>
-    {!loaded || failed ? <span className="placeholder-label">Bruno · visual stand-in</span> : null}
+    {showFallback ? <span className="placeholder-label">Bruno · visual stand-in</span> : null}
   </div>;
 }
