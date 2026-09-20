@@ -86,7 +86,6 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
       setActiveFrame(null);
       setOutgoingFrame(null);
       setTransitionFrom(null);
-      setTransitionFrom(null);
       return;
     }
 
@@ -144,6 +143,7 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
       markFailed(desiredImage);
       setActiveFrame(null);
       setOutgoingFrame(null);
+      setTransitionFrom(null);
     };
     preload.src = desiredImage;
 
