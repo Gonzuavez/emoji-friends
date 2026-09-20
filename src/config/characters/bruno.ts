@@ -3,7 +3,7 @@ export interface BrunoCharacterConfig {
   name: string;
   branding: string;
   image?: string;
-  // Optional approved pose art. Missing/broken poses fall back to the base PNG.
+  // Optional approved standalone pose art. Missing/broken performance poses use the visual stand-in.
   poseImages?: Partial<Record<BrunoPose, string>>;
   voice: { id: string; name: string; provider: 'heygen'; language: string; direction: string };
 }
@@ -25,7 +25,8 @@ export const bruno: BrunoCharacterConfig = {
   poseImages: {
     capPeek: '/characters/bruno/poses/bruno-peek.png',
     eyesRise: '/characters/bruno/poses/bruno-rising.png',
-    peek: '/characters/bruno/poses/bruno-peek.png',
+    // Hold the risen upper-body pose here so the entrance never drops back down.
+    peek: '/characters/bruno/poses/bruno-rising.png',
     paw: '/characters/bruno/poses/bruno-paw-glass.png',
     recognition: '/characters/bruno/poses/bruno-hello.png',
     introduction: '/characters/bruno/poses/bruno-master.png',
