@@ -37,7 +37,6 @@ h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size
 .character-layer[data-pose='paw'] .glass-paw, .character-layer[data-pose='peek'] .glass-paw { opacity: .8; transform: scale(1); }
 .placeholder-label { position: absolute; top: 100%; width: 100%; text-align: center; color: #aaa18f; font-size: 9px; letter-spacing: .1em; }
 .waving-paw { transform-origin: 260px 305px; }
-.character-layer[data-pose='exit'] .waving-paw { animation: wave 1.15s ease-in-out 3; }
 .dialogue { position: absolute; top: 65svh; left: max(24px, env(safe-area-inset-left)); right: max(24px, env(safe-area-inset-right)); text-align: center; }
 .dialogue-line { max-width: 480px; margin: auto; animation: appear .65s both; }
 .dialogue-line > p:last-child { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(22px, 5.7vw, 29px); line-height: 1.35; margin: 14px 0; text-wrap: balance; }
@@ -65,3 +64,36 @@ a { color: #efd7b5; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .bear, .glass-paw { transform: none !important; } .glass-ripple { opacity: .25; box-shadow: 0 0 40px #d5cbb83c; } }
 
 @media (prefers-reduced-motion: reduce) { .stage[data-phase='opening'] .arrival { visibility: hidden; } }
+
+/* Production art keeps its own alpha edges; no crop, opaque backing, or mask. */
+.character-layer[data-asset='production'] .bear { mask-image: none; }
+.character-art { object-fit: contain; object-position: center; }
+.stage::after { content: ''; pointer-events: none; position: absolute; z-index: 1; inset: 0; border: 1px solid #dfd6be09; background: linear-gradient(115deg, transparent 20%, #fff9e704 43%, transparent 55%); }
+.character-layer[data-pose='paw'] .glass-paw { filter: drop-shadow(0 1px 2px #0008) drop-shadow(0 0 18px #dab58a44); }
+.character-layer[data-pose='recognition'] .bear { transform: translateY(8%) scale(.97); }
+.character-layer[data-asset='production'][data-pose='exit'] .character-art { transform-origin: 50% 80%; animation: goodbye-sway 1.8s ease-in-out 2; }
+@keyframes goodbye-sway { 0%,100% { transform: rotate(0); } 35% { transform: rotate(-2deg); } 70% { transform: rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .character-art { transform: none !important; } }
+.character-art.is-loading { position: absolute; opacity: 0; }
+
+/* Approved performance cues. Only approved pose art can add a real cap,
+   articulated production wink/wave, or a rear view with a backpack. */
+.bear { clip-path: inset(0 0 0 0); transition: transform 1.1s ease, opacity .8s, clip-path .85s ease; }
+.character-layer[data-pose='capPeek'] .bear { clip-path: inset(0 0 80% 0); transform: translateY(12%) scale(.82); }
+.character-layer[data-pose='eyesRise'] .bear { clip-path: inset(0 0 53% 0); transform: translateY(10%) scale(.86); }
+.character-layer[data-pose='peek'] .bear { clip-path: inset(0 0 20% 0); transform: translateY(10%) scale(.9); }
+.character-layer[data-pose='paw'] .bear { opacity: 1; transform: translateY(8%) scale(.96); }
+.character-layer[data-pose='peek'] .glass-paw { opacity: 0; }
+.character-layer[data-pose='reaction'] .bear { transform: translateY(7%) scale(1); }
+.character-layer[data-pose='wave'] .waving-paw { animation: wave 1.05s ease-in-out; }
+.character-layer[data-asset='production'][data-pose='exit'] .character-art { animation: none; }
+.character-layer[data-asset='production'][data-pose='wave'] .character-art { transform-origin: 50% 80%; animation: goodbye-sway 1.1s ease-in-out; }
+.character-layer[data-pose='wink'] .wink-eye { transform-box: fill-box; transform-origin: center; transform: scaleY(.15); }
+.character-layer[data-pose='turn'] .bear { transform: perspective(700px) rotateY(-28deg) translateX(4%) scale(.91); }
+.character-layer[data-pose='depart'] .bear { transform: translate(18%, -3%) scale(.68); }
+.character-layer[data-pose='depart'] { transition: opacity 1.4s ease-in; }
+.emotional-prop { position: absolute; width: 24%; height: 24%; object-fit: contain; left: 38%; bottom: 15%; }
+@media (prefers-reduced-motion: reduce) {
+  .bear { transform: none !important; }
+  .character-layer[data-pose='depart'] { opacity: 0; }
+}

@@ -5,13 +5,19 @@ export const timeline = [
   { id: 'knock1', duration: 1200 },
   { id: 'knock2', duration: 260 },
   { id: 'knock3', duration: 850 },
-  { id: 'paw', duration: 1200 },
-  { id: 'peek', duration: 1500 },
+  { id: 'capPeek', duration: 850 },
+  { id: 'eyesRise', duration: 950 },
+  { id: 'peek', duration: 1000 },
+  { id: 'paw', duration: 1100 },
   { id: 'recognition', duration: 2400 },
   { id: 'introduction', duration: 4400 },
   { id: 'message', duration: 4900 },
+  { id: 'reaction', duration: 950 },
   { id: 'exit', duration: 5300 },
-  { id: 'depart', duration: 1100 },
+  { id: 'wave', duration: 1100 },
+  { id: 'wink', duration: 650 },
+  { id: 'turn', duration: 750 },
+  { id: 'depart', duration: 1500 },
 ] as const;
 export type Phase = 'idle' | typeof timeline[number]['id'] | 'cta';
 export type DialogueCue = keyof Gift['audio'];

@@ -41,7 +41,7 @@ Mobile-first web experience. Netlify will host the application. Supabase, Stripe
 
 © 2026 ADYD Ventures OÜ. All rights reserved.
 
-## Run Work Order #001
+## Run the Bruno experience (Work Orders #001–002)
 
 Use Node.js 22.12+ (Node 22 recommended) and npm.
 
@@ -64,21 +64,44 @@ Tests run against the production build, so run `npm run build` first. They cover
 ## Architecture
 
 - `src/config/gifts/brunoThinkingOfYou.ts`: typed gift data, all personalized copy, and async `loadGift(id)` boundary. Edit `senderName`, `recipientName`, and `message` here. The same `/g/:giftId` route and experience render every gift; the local loader can later be replaced with a data service.
-- `src/experiences/BrunoThinkingOfYou/`: explicit, centralized timeline and lifecycle hook. The roughly 30-second sequence progresses from opening through knocks, paw, peek, recognition, introduction, message, exit, departure, and CTA. Longer captions receive more reading time. Replay returns to the initial tap and cleans up prior playback. Pause/resume restarts the current beat; hiding the tab pauses until the user resumes.
+- `src/experiences/BrunoThinkingOfYou/`: explicit, centralized timeline and lifecycle hook. The caption-only sequence runs for roughly 35 seconds: dark opening/knocks, cap peek, eyes rise, full peek, paw press, recognition/introduction/message, warm reaction, exit line, wave, wink, turn, departure, and CTA. Real clips extend beats when needed. Longer captions receive more reading time. Replay returns to the initial tap and cleans up prior playback. Pause/resume restarts the current beat; hiding the tab pauses until the user resumes.
 - `src/components/stage/`: immersive glass/stage layer. CSS uses safe-area insets, responsive layouts, and reduced-motion overrides. Short/landscape screens scroll vertically so controls remain reachable.
-- `src/components/character/BrunoCharacter.tsx`: replaceable, explicitly labeled monochrome Bruno stand-in. Pose names come from the timeline. No fetched artwork or character-animation dependency.
-- `src/audio/ExperienceAudio.ts`: gesture-unlocked Web Audio, three soft synthesized knocks, optional local dialogue cues, cancellation, and silent fallback. Dialogue is always captioned. Sound and pause controls appear during playback.
+- `src/components/character/BrunoCharacter.tsx`: production PNG/optional pose adapter with the original, explicitly labeled stand-in on missing/failed assets. Pose names come from the existing timeline; future Rive integration stays in this layer. An optional gift-level prop is shown only during configured poses, never permanently attached to Bruno.
+- `src/config/characters/bruno.ts`: approved image path, optional pose mappings, canonical `bruno-en-v1` English voice identity/direction, and the four local demo clip URLs.
+- `src/audio/ExperienceAudio.ts`: gesture-unlocked Web Audio, three soft synthesized knocks, bounded preload/decode, actual clip-completion timing, cancellation, and silent fallback. Dialogue is always captioned. Sound and pause controls appear during playback.
 
-## Bruno visual and audio handoff
+## Production files still needed
 
-**Next action for Angel/ChatGPT:** supply approved Bruno artwork (transparent PNG/WebP, ideally a portrait 2:3 canvas with head/paw clearance) or an approved animation containing paw press, peek/approach, recognition, smile/wave, and departure. Place a static asset at `public/characters/bruno/bruno.png` and set `character.image` to `/characters/bruno/bruno.png`. For a Rive handoff, place `bruno.riv` in the same folder and provide the artboard/state-machine/input names; player integration belongs to the next work order. See `public/characters/bruno/README.md`.
+No approved production image or voice file is physically present. Add these exact files and rebuild; their URLs are already configured:
 
-Supply four approved voice clips matching the configured text and names, then place them under `public/audio/` and set the `audio.recognition`, `audio.introduction`, `audio.message`, and `audio.exit` URLs in the gift config. Adjust the central beat durations to accommodate each recording. See `public/audio/README.md`.
+- `public/characters/bruno/bruno.png`
+- `public/audio/bruno-recognition.mp3`
+- `public/audio/bruno-introduction.mp3`
+- `public/audio/bruno-message.mp3`
+- `public/audio/bruno-exit.mp3`
 
-## Current limitations and Work Order #002
+See [visual handoff](public/characters/bruno/README.md) for the locked identity, transparent-canvas requirements, optional pose files for the approved wave/wink/backpack departure, and occasion prop configuration. See [voice handoff](public/audio/README.md) for the exact four scripts and canonical voice direction. No replacement artwork or voice has been invented. `prop: null` is the default; a heart is not part of Bruno’s permanent character design.
 
-This is the first recipient-experience proof of concept. Bruno is a temporary visual stand-in; there is no spoken dialogue until recordings are supplied. A configured static image uses approach/departure transitions but needs an animated asset for articulated expressions and waves. Optional recordings depend on browser audio support and network loading; captions continue if audio cannot play. Muting stops the current recording; unmuting applies to the next cue. Timings must be aligned with final voice clips. Test final sound and animation on physical iOS/Android devices before launch.
+## Voice timing and controls
 
-“Send Bruno to Someone” reveals a brief coming-next notice. It does not collect information or pretend to create/send a gift. Unknown gift IDs show a helpful fallback. Only the local demo gift exists.
+Clips preload after the initial gesture and are decoded through Web Audio. Dialogue beats wait for the longer of caption-reading time and actual clip completion (plus 250 ms). Failed or slow fetch/decode falls back to captions after a bounded 2.5-second loading budget. The existing sequence/timing module remains the source of visual pacing. Long recordings naturally lengthen the experience.
 
-For Work Order #002, approve the visual/voice handoff first, integrate those assets, and tune timing on real phones. Define the next sender/gift-link flow separately before implementing it. Accounts, database, payments, marketplace, analytics, paid TTS, and video APIs remain deferred.
+Pause stops speech and the current beat; Resume re-unlocks audio from the gesture and starts that beat again. Mute silences the master output without losing clip position. Replay cancels active speech, invalidates delayed work, aborts pending requests, and clears the cache. Hiding the tab pauses the experience. A stalled playback watchdog and audio-interruption handling prevent indefinite waits. Captions always remain visible for the complete spoken beat.
+
+## Validation and physical-phone handoff
+
+Run `npm ci`, `npm run build`, then `npm test`. The browser suite covers the original experience plus configured production asset/fallback, canonical clip paths, long-clip caption timing, mute/pause/resume, replay cleanup, missing/invalid/slow audio, approved pose order, reduced motion, and 320px portrait layout. Synthetic audio doubles and a neutral test pixel only exist inside tests; they are not production artwork or voice.
+
+**Physical iPhone/Android validation is pending.** On iPhone Safari and Android Chrome, check the initial tap, silent-mode/volume behavior, headphones/Bluetooth, pause/resume, mute/unmute mid-sentence, replay twice, tab switching, screen lock, slow networking, safe areas, portrait/landscape, and reduced motion. Confirm eye contact, caption pacing, voice level, and the final emotional result with the approved art/audio. Browser emulation does not validate those qualities.
+
+## Netlify preview handoff
+
+The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. This work order prepares the code and PR; it does not deploy or merge them.
+
+If this repository already has a Netlify site with Deploy Previews enabled, use the deploy-preview link attached to the new PR after its build succeeds. Otherwise connect the GitHub repository to Netlify, retain the checked-in build settings, enable Deploy Previews, and build this PR head. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. Add approved files before the emotional test; without them the preview intentionally uses the original stand-in and captions. Do not promote to production until reviewed.
+
+## Current limitations
+
+A static front-view PNG supports CSS reveals/approach/sway/departure, but cannot produce an articulated production paw, wink, or turn-and-walk animation with a backpack. Those pose hooks are ready; approved pose art or a later approved animation is still required for the full visual performance. Reduced motion presents the same ordered poses without animated movement.
+
+“Send Bruno to Someone” retains the coming-next notice; it does not create or send a gift. Only the local demo exists. Supabase, payments, authentication, sender builder, marketplace, analytics, paid TTS/video APIs, admin tools, and other characters remain out of scope.
