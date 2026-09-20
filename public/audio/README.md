@@ -1,6 +1,6 @@
 # Canonical Bruno voice handoff — Work Order #002
 
-No production voice recordings are committed. Captions remain usable without audio. Place these approved files at the exact paths below; URLs are already configured in `src/config/characters/bruno.ts` and used by the demo gift:
+The four supplied recordings from `Bruno_BRUNOJI_Audio_Pack.zip` are installed unchanged at the paths below. File hashes are checked by the shipped-asset tests. No regeneration, pitch shifting, transcoding, or substitution was performed. Captions remain usable if audio is unavailable. URLs are configured in `src/config/characters/bruno.ts`.
 
 | File | Exact spoken text |
 | --- | --- |
@@ -8,6 +8,8 @@ No production voice recordings are committed. Captions remain usable without aud
 | `public/audio/bruno-introduction.mp3` | Hi! I’m Bruno. Angel asked me to bring you something. |
 | `public/audio/bruno-message.mp3` | Just a little reminder that someone is thinking about you today. |
 | `public/audio/bruno-exit.mp3` | Okay… my job here is done. But don’t tell Angel I ate the snacks. |
+
+Detected MP3 durations (macOS `afinfo`): recognition **1.464 s**, introduction **3.456 s**, message **3.120 s**, exit **4.416 s**. Native browser decoded durations may be slightly shorter because encoder padding is removed; playback completion remains authoritative.
 
 Use the locked canonical HeyGen voice **BRUNOJI**, Voice ID **`M9QQyAAoUtDSmALeZnRw`**, English: youthful/childlike (roughly 8–10-year-old character feel), light, warm, cheerful, curious, playful, gentle, expressive, natural, family-friendly. Never squeaky/shrill, deep/adult, announcer-like, or corporate. This identity and direction live separately from gift text and clip URLs, ready for future occasions. Export the four approved scripts using BRUNOJI and place the MP3 files at the paths above; do not independently choose a new voice for each gift.
 

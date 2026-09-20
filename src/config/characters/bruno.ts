@@ -20,7 +20,9 @@ export const bruno: BrunoCharacterConfig = {
   name: 'Bruno',
   branding: 'Bruno paw-heart',
   image: '/characters/bruno/bruno.png',
-  poseImages: {},
+  // The supplied master already shows both paws toward the viewer. Other
+  // poses retain this same approved image until dedicated art is supplied.
+  poseImages: { paw: '/characters/bruno/bruno.png' },
   voice: {
     id: 'M9QQyAAoUtDSmALeZnRw',
     name: 'BRUNOJI',

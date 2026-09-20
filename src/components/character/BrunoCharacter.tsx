@@ -18,6 +18,8 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
   const onFailure = (url: string) => setFailedUrls(previous => new Set(previous).add(url));
   return <div className={`character-layer ${visible ? 'is-visible' : ''}`} data-pose={phase} data-asset={loaded && !failed ? 'production' : 'fallback'} aria-hidden="true">
     <div className="character-aura" />
+    <div className="glass-contact glass-contact-left" />
+    <div className="glass-contact glass-contact-right" />
     <div className="glass-paw"><i /><i /><i /><i /><b /></div>
     <div className="bear">
       {image && !failed && <img className={`character-art ${loaded ? 'is-loaded' : 'is-loading'}`} key={image} src={image} alt="" onLoad={() => setLoadedUrls(previous => new Set(previous).add(image))} onError={() => onFailure(image)} />}

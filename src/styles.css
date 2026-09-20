@@ -97,3 +97,13 @@ a { color: #efd7b5; }
   .bear { transform: none !important; }
   .character-layer[data-pose='depart'] { opacity: 0; }
 }
+
+/* Use the approved forward paws, not the prototype paw shape, with production art. */
+.character-layer[data-asset='production'] .glass-paw { display: none; }
+.character-layer[data-asset='production'][data-pose='paw'] .bear { transform: translateY(7%) scale(1.06); }
+.glass-contact { position: absolute; z-index: 2; width: 15%; aspect-ratio: 1; border: 1px solid #fff7de40; border-radius: 50%; box-shadow: 0 0 20px #f9dfa922, inset 0 0 15px #fff6de14; opacity: 0; pointer-events: none; }
+.glass-contact-left { left: 23%; top: 58%; }
+.glass-contact-right { right: 17%; top: 43%; }
+.character-layer[data-asset='production'][data-pose='paw'] .glass-contact { animation: glass-touch 1.1s ease-out both; }
+@keyframes glass-touch { 0% { opacity: 0; transform: scale(.7); } 45% { opacity: .65; } 100% { opacity: 0; transform: scale(1.4); } }
+@media (prefers-reduced-motion: reduce) { .glass-contact { display: none; } }

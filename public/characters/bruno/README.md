@@ -1,10 +1,10 @@
 # Approved Bruno asset handoff — Work Order #002
 
-No production art is committed. The monochrome Work Order #001 stand-in remains the fallback; it is not the approved character identity. Do not generate, download, or substitute replacement art.
+The supplied canonical `Brunoji.png` is installed byte-for-byte as `bruno.png` (1024×1536; SHA-256 `e8f7968f1e6ec7c4beea9b7e24e8dd26ebfefc86dd1526bd8a70fcb0e2973d37`). Its alpha channel and transparent edges are preserved. No additional approved individual pose files were supplied. The monochrome Work Order #001 stand-in remains the fallback; it is not the approved character identity. Do not generate, download, or substitute replacement art.
 
-## Required base image
+## Installed base image
 
-Place the approved transparent PNG at **`public/characters/bruno/bruno.png`**. The configured URL is already `/characters/bruno/bruno.png`; adding the file and rebuilding is sufficient. Use an RGBA portrait canvas (2:3 recommended), centered character, head/cap toward the upper edge, and clear space around the paws. Alpha edges are preserved with `object-fit: contain`, no background, and no production-image mask. Test cropping on the real artwork before sign-off. An image still loading or failing to load keeps the existing stand-in visible.
+The approved master is at **`public/characters/bruno/bruno.png`**. This is the supplied RGBA image; its existing alpha channel is rendered directly. The configured URL is already `/characters/bruno/bruno.png`; adding the file and rebuilding is sufficient. Use an RGBA portrait canvas (2:3 recommended), centered character, head/cap toward the upper edge, and clear space around the paws. Alpha edges are preserved with `object-fit: contain`, no background, and no production-image mask. Test cropping on the real artwork before sign-off. An image still loading or failing to load keeps the existing stand-in visible.
 
 Locked identity: warm brown fluffy teddy bear, oversized round head, tiny chibi body, enormous glossy amber-brown eyes, cap and hoodie with the approved **Bruno paw-heart branding (not ADYD branding)**, and backpack when appropriate. Nothing in this work order redesigns that identity.
 
@@ -12,7 +12,7 @@ Locked identity: warm brown fluffy teddy bear, oversized round head, tiny chibi 
 
 The existing timeline now emits `capPeek → eyesRise → peek → paw → recognition → introduction → message → reaction → exit → wave → wink → turn → depart`, following the dark opening and soft knocks. `exit` carries the approved snacks line before the wave/wink/departure.
 
-The base image can perform reveal, approach, gentle sway and recession through CSS. **A single static PNG cannot articulate a paw, wink, rotate to a true rear view, or walk with a backpack.** The old paw/eye stand-in animation is only a fallback. To realize those details without changing gift logic, supply approved transparent pose images and map them in `src/config/characters/bruno.ts` → `poseImages`. Suggested handoff filenames:
+Current mapping: `paw` explicitly maps to `/characters/bruno/bruno.png`; all other character poses resolve to that same base image. Cap/eyes/peek use CSS reveals, paw approaches with subtle glass highlights, speaking/reaction use a hold or gentle approach, wave uses a sway, wink holds the unchanged master, and turn/departure use perspective/recession/fade. The prototype paw graphic is hidden when production artwork is displayed; no drawn paw covers the supplied paws. **A single static PNG cannot articulate a paw, wink, rotate to a true rear view, or walk with a backpack.** The old paw/eye stand-in animation is only a fallback. To realize those details without changing gift logic, supply approved transparent pose images and map them in `src/config/characters/bruno.ts` → `poseImages`. Suggested handoff filenames:
 
 | Pose | Optional approved file |
 | --- | --- |

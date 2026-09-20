@@ -1,3 +1,4 @@
+import { installAudio } from './helpers/audio';
 import { expect, test, type Page } from '@playwright/test';
 import { bruno, brunoDemoAudio } from '../src/config/characters/bruno';
 import { brunoThinkingOfYou } from '../src/config/gifts/brunoThinkingOfYou';
@@ -6,44 +7,6 @@ import { durationFor, timeline } from '../src/experiences/BrunoThinkingOfYou/tim
 // Deliberately neutral test pixel and deterministic audio double, never shipped
 // as Bruno art/voice. These test integration, not production creative approval.
 const pixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=', 'base64');
-async function installAudio(page: Page, duration = 8) {
-  await page.addInitScript(({ duration }) => {
-    const stats = { starts: 0, stops: 0, ended: 0, active: 0, resumes: 0, gain: 1 };
-    Object.assign(window, { audioStats: stats });
-    class Source {
-      buffer: unknown;
-      onended: (() => void) | null = null;
-      timer = 0;
-      running = false;
-      connect() { return this; }
-      disconnect() {}
-      start() {
-        this.running = true; stats.starts++; stats.active++;
-        this.timer = window.setTimeout(() => {
-          this.running = false; stats.active--; stats.ended++; this.onended?.();
-        }, duration * 1000);
-      }
-      stop() {
-        if (this.running) { this.running = false; stats.active--; stats.stops++; }
-        window.clearTimeout(this.timer);
-      }
-    }
-    class Context {
-      state = 'suspended'; currentTime = 0; destination = {}; onstatechange: (() => void) | null = null;
-      async resume() { stats.resumes++; this.state = 'running'; }
-      async close() { this.state = 'closed'; }
-      async decodeAudioData() { return { duration }; }
-      createBufferSource() { return new Source(); }
-      createGain() { return { gain: {
-        set value(value: number) { stats.gain = value; },
-        setValueAtTime() {}, exponentialRampToValueAtTime() {},
-      }, connect() { return this; }, disconnect() {} }; }
-      createOscillator() { return { frequency: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() { return this; }, disconnect() {}, start() {}, stop() {}, onended: null }; }
-    }
-    Object.defineProperty(window, 'AudioContext', { value: Context });
-  }, { duration });
-  await page.route('**/audio/bruno-*.mp3', route => route.fulfill({ contentType: 'audio/mpeg', body: Buffer.from([0]) }));
-}
 async function stats(page: Page) {
   return page.evaluate(() => (window as unknown as { audioStats: { starts: number; stops: number; active: number; ended: number; gain: number; resumes: number } }).audioStats);
 }
@@ -158,6 +121,7 @@ test('404 and invalid clips fall back to captions through CTA at narrow width', 
 
 
 test('approved performance order stays intact without a permanent prop', async ({ page }) => {
+  await installAudio(page, 0.1);
   expect(timeline.map(step => step.id)).toEqual([
     'opening', 'knock1', 'knock2', 'knock3', 'capPeek', 'eyesRise', 'peek', 'paw',
     'recognition', 'introduction', 'message', 'reaction', 'exit', 'wave', 'wink', 'turn', 'depart',
@@ -219,5 +183,27 @@ test('real Web Audio decodes a local clip and ends before advancing', async ({ p
   await expect.poll(() => page.evaluate(() => (window as unknown as { realAudioStats: { ended: number } }).realAudioStats.ended)).toBe(1);
   await expect(page.locator('main')).toHaveAttribute('data-phase', 'recognition');
   await page.clock.runFor(durationFor(timeline.findIndex(step => step.id === 'recognition'), brunoThinkingOfYou));
+  await expect(page.locator('main')).toHaveAttribute('data-phase', 'introduction');
+});
+
+
+test('audio interruption pauses and resumes the same caption safely', async ({ page }) => {
+  await installAudio(page);
+  await page.clock.install();
+  await page.goto('/');
+  await reachRecognition(page);
+  await expect.poll(async () => (await stats(page)).starts).toBe(1);
+  await page.evaluate(() => {
+    const context = (window as unknown as { testAudioContext: { state: string; onstatechange: () => void } }).testAudioContext;
+    context.state = 'suspended';
+    context.onstatechange();
+  });
+  await expect(page.getByRole('button', { name: 'Resume experience' })).toBeVisible();
+  expect((await stats(page)).active).toBe(0);
+  await page.clock.runFor(15000);
+  await expect(page.getByText('Psst… Leticia?')).toBeVisible();
+  await page.getByRole('button', { name: 'Resume experience' }).click();
+  await expect.poll(async () => (await stats(page)).starts).toBe(2);
+  await page.clock.runFor(8250);
   await expect(page.locator('main')).toHaveAttribute('data-phase', 'introduction');
 });

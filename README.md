@@ -59,7 +59,7 @@ npx playwright install chromium
 npm test
 ```
 
-Tests run against the production build, so run `npm run build` first. They cover the complete timeline, exact demo dialogue, replay, the send CTA, pause/resume, missing Web Audio, unknown gifts, horizontal overflow, and phone/desktop/reduced-motion modes. Screenshots and failure traces go to ignored `test-results/`. Browser tests advance the browser clock instead of waiting through each performance.
+Tests run against the production build, so run `npm run build` first. They cover the complete timeline, exact demo dialogue, replay, the send CTA, pause/resume, missing Web Audio, unknown gifts, horizontal overflow, and iPhone/Android portrait, desktop, and reduced-motion modes. Screenshots and failure traces go to ignored `test-results/`. Timeline/control tests use a controlled browser clock. Shipped-asset tests also run the complete performance in real time with the actual MP3 decoder and production image.
 
 ## Architecture
 
@@ -70,9 +70,9 @@ Tests run against the production build, so run `npm run build` first. They cover
 - `src/config/characters/bruno.ts`: approved image path, optional pose mappings, locked canonical HeyGen voice **BRUNOJI** (`M9QQyAAoUtDSmALeZnRw`), English voice direction, and the four local demo clip URLs.
 - `src/audio/ExperienceAudio.ts`: gesture-unlocked Web Audio, three soft synthesized knocks, bounded preload/decode, actual clip-completion timing, cancellation, and silent fallback. Dialogue is always captioned. Sound and pause controls appear during playback.
 
-## Production files still needed
+## Supplied production assets
 
-No approved production image or voice file is physically present. Add these exact files and rebuild; their URLs are already configured:
+The approved `Brunoji.png` master and all four files from `Bruno_BRUNOJI_Audio_Pack.zip` are installed unchanged at these configured paths:
 
 - `public/characters/bruno/bruno.png`
 - `public/audio/bruno-recognition.mp3`
@@ -81,6 +81,8 @@ No approved production image or voice file is physically present. Add these exac
 - `public/audio/bruno-exit.mp3`
 
 The production identity is locked to the approved Bruno bear with **Bruno paw-heart branding**, not ADYD character branding. ADYD Ventures remains the platform owner/copyright holder. The canonical voice is **BRUNOJI** on HeyGen, Voice ID `M9QQyAAoUtDSmALeZnRw`; the client only plays exported local clips.
+
+All visible character beats reuse this one approved master. Cap/eyes/peek use CSS reveals; paw uses a closer scale with subtle contact highlights; speaking/reaction hold or gently approach; wave uses sway; wink holds the master; turn/departure use perspective, recession and fade. No dedicated wink or rear-view artwork is fabricated.
 
 See [visual handoff](public/characters/bruno/README.md) for the locked identity, transparent-canvas requirements, optional pose files for the approved wave/wink/backpack departure, and occasion prop configuration. See [voice handoff](public/audio/README.md) for the exact four scripts and canonical voice direction. No replacement artwork or voice has been invented. `prop: null` is the default; a heart is not part of Bruno’s permanent character design.
 
@@ -100,10 +102,10 @@ Run `npm ci`, `npm run build`, then `npm test`. The browser suite covers the ori
 
 The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. The dedicated `emoji-friends` Netlify project belongs to the A.N.G.E.L.S team and is connected only to `Gonzuavez/emoji-friends`. Pull requests build as Deploy Previews; PR #4 remains open for review.
 
-Use the successful Deploy Preview link attached to PR #4 or open the [Emoji Friends deploy dashboard](https://app.netlify.com/projects/emoji-friends/deploys). The existing A.N.G.E.L.S website/project is separate and unchanged. Keep the checked-in build settings; do not merge the PR to test it. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. Add approved files before the emotional test; without them the preview intentionally uses the original stand-in and captions. Do not promote to production until reviewed.
+Use the successful Deploy Preview link attached to PR #4 or open the [Emoji Friends deploy dashboard](https://app.netlify.com/projects/emoji-friends/deploys). The existing A.N.G.E.L.S website/project is separate and unchanged. Keep the checked-in build settings; do not merge the PR to test it. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. The preview uses the supplied real master and BRUNOJI recordings; missing or failed assets still fall back gracefully. Do not promote to production until reviewed.
 
 ## Current limitations
 
-A static front-view PNG supports CSS reveals/approach/sway/departure, but cannot produce an articulated production paw, wink, or turn-and-walk animation with a backpack. Those pose hooks are ready; approved pose art or a later approved animation is still required for the full visual performance. Reduced motion presents the same ordered poses without animated movement.
+The supplied 1024×1536 RGBA master and its transparent edges are preserved unchanged. A static front-view PNG supports CSS reveals/approach/sway/departure, but cannot produce an articulated production paw, wink, or turn-and-walk animation with a backpack. Those pose hooks are ready; approved pose art or a later approved animation is still required for the full visual performance. Reduced motion presents the same ordered poses without animated movement.
 
 “Send Bruno to Someone” retains the coming-next notice; it does not create or send a gift. Only the local demo exists. Supabase, payments, authentication, sender builder, marketplace, analytics, paid TTS/video APIs, admin tools, and other characters remain out of scope.

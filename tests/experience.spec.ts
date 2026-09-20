@@ -1,8 +1,11 @@
+import { installAudio } from './helpers/audio';
 import { expect, test } from '@playwright/test';
 import { brunoThinkingOfYou } from '../src/config/gifts/brunoThinkingOfYou';
 import { durationFor, timeline } from '../src/experiences/BrunoThinkingOfYou/timeline';
 
 test('complete gift, send notice, and clean replay without browser errors', async ({ page }, testInfo) => {
+  // Clock-controlled voice; the shipped recordings also have a real-time test.
+  await installAudio(page, 0.1);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
