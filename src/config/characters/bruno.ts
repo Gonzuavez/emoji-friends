@@ -20,9 +20,23 @@ export const bruno: BrunoCharacterConfig = {
   name: 'Bruno',
   branding: 'Bruno paw-heart',
   image: '/characters/bruno/bruno.png',
-  // The supplied master already shows both paws toward the viewer. Other
-  // poses retain this same approved image until dedicated art is supplied.
-  poseImages: { paw: '/characters/bruno/bruno.png' },
+  // Every performance state uses a dedicated standalone PNG. The base image
+  // is retained only as a non-performance fallback outside the pose sequence.
+  poseImages: {
+    capPeek: '/characters/bruno/poses/bruno-peek.png',
+    eyesRise: '/characters/bruno/poses/bruno-rising.png',
+    peek: '/characters/bruno/poses/bruno-peek.png',
+    paw: '/characters/bruno/poses/bruno-paw-glass.png',
+    recognition: '/characters/bruno/poses/bruno-hello.png',
+    introduction: '/characters/bruno/poses/bruno-master.png',
+    message: '/characters/bruno/poses/bruno-talking.png',
+    reaction: '/characters/bruno/poses/bruno-wink.png',
+    exit: '/characters/bruno/poses/bruno-master.png',
+    wave: '/characters/bruno/poses/bruno-wave.png',
+    wink: '/characters/bruno/poses/bruno-wink.png',
+    turn: '/characters/bruno/poses/bruno-exit.png',
+    depart: '/characters/bruno/poses/bruno-exit.png',
+  },
   voice: {
     id: 'M9QQyAAoUtDSmALeZnRw',
     name: 'BRUNOJI',
