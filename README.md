@@ -98,9 +98,9 @@ Run `npm ci`, `npm run build`, then `npm test`. The browser suite covers the ori
 
 ## Netlify preview handoff
 
-The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. This work order prepares the code and PR; it does not deploy or merge them.
+The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. The dedicated `emoji-friends` Netlify project belongs to the A.N.G.E.L.S team and is connected only to `Gonzuavez/emoji-friends`. Pull requests build as Deploy Previews; PR #4 remains open for review.
 
-If this repository already has a Netlify site with Deploy Previews enabled, use the deploy-preview link attached to the new PR after its build succeeds. Otherwise connect the GitHub repository to Netlify, retain the checked-in build settings, enable Deploy Previews, and build this PR head. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. Add approved files before the emotional test; without them the preview intentionally uses the original stand-in and captions. Do not promote to production until reviewed.
+Use the successful Deploy Preview link attached to PR #4 or open the [Emoji Friends deploy dashboard](https://app.netlify.com/projects/emoji-friends/deploys). The existing A.N.G.E.L.S website/project is separate and unchanged. Keep the checked-in build settings; do not merge the PR to test it. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. Add approved files before the emotional test; without them the preview intentionally uses the original stand-in and captions. Do not promote to production until reviewed.
 
 ## Current limitations
 
