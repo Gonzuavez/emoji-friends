@@ -11,7 +11,9 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
   const pose = phase as BrunoPose;
   const visible = !['idle', 'opening', 'knock1', 'knock2', 'knock3', 'cta'].includes(phase);
   const poseImage = character.poseImages?.[pose];
-  const image = poseImage && !failedUrls.has(poseImage) ? poseImage : character.image;
+  // Performance poses must never fall back to the old composite/master art.
+  // If a dedicated pose is missing or fails, show the neutral SVG stand-in.
+  const image = poseImage && !failedUrls.has(poseImage) ? poseImage : undefined;
   const failed = !image || failedUrls.has(image);
   const loaded = !!image && loadedUrls.has(image);
   const showProp = prop && prop.showDuring.includes(pose) && !failedUrls.has(prop.image);
