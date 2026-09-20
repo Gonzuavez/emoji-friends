@@ -219,3 +219,31 @@ a { color: #efd7b5; }
     transform: none !important;
   }
 }
+
+
+/* Standalone Bruno pose renderer.
+   Each phase displays exactly one dedicated transparent PNG. Never crop or
+   reveal a composite character sheet, and never layer prototype paws over it. */
+.character-layer[data-asset='production'] .bear {
+  clip-path: none !important;
+  mask-image: none !important;
+  opacity: 1;
+}
+.character-layer[data-asset='production'] .character-art {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.character-layer[data-asset='production'] .glass-paw,
+.character-layer[data-asset='production'] .glass-contact {
+  display: none !important;
+}
+
+/* Entrance artwork is already composed as standalone poses; do not use
+   sheet-style clipping on cap/eyes/peek states. */
+.character-layer[data-asset='production'][data-pose='capPeek'] .bear,
+.character-layer[data-asset='production'][data-pose='eyesRise'] .bear,
+.character-layer[data-asset='production'][data-pose='peek'] .bear {
+  clip-path: none !important;
+}
