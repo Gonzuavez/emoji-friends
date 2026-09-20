@@ -107,3 +107,115 @@ a { color: #efd7b5; }
 .character-layer[data-asset='production'][data-pose='paw'] .glass-contact { animation: glass-touch 1.1s ease-out both; }
 @keyframes glass-touch { 0% { opacity: 0; transform: scale(.7); } 45% { opacity: .65; } 100% { opacity: 0; transform: scale(1.4); } }
 @media (prefers-reduced-motion: reduce) { .glass-contact { display: none; } }
+
+
+/* Work Order #002 phone-review motion pass.
+   The approved Bruno asset is a single flat PNG, so these cues animate the
+   whole production artwork. Dedicated pose/Rive art can later replace them. */
+.character-layer[data-asset='production'] .character-art {
+  transform-origin: 50% 78%;
+  will-change: transform, opacity;
+}
+.character-layer[data-asset='production'][data-pose='capPeek'] .character-art {
+  animation: bruno-cap-arrive .85s cubic-bezier(.2,.8,.2,1) both;
+}
+.character-layer[data-asset='production'][data-pose='eyesRise'] .character-art {
+  animation: bruno-eyes-rise .95s cubic-bezier(.2,.75,.25,1) both;
+}
+.character-layer[data-asset='production'][data-pose='peek'] .character-art {
+  animation: bruno-peek-in 1s cubic-bezier(.2,.8,.2,1) both;
+}
+.character-layer[data-asset='production'][data-pose='paw'] .character-art {
+  animation: bruno-paw-press 1.1s cubic-bezier(.2,.8,.2,1) both;
+}
+.character-layer[data-asset='production'][data-pose='recognition'] .character-art {
+  animation: bruno-talk-bob 1.15s ease-in-out infinite;
+}
+.character-layer[data-asset='production'][data-pose='introduction'] .character-art {
+  animation: bruno-talk-bob 1.05s ease-in-out infinite;
+}
+.character-layer[data-asset='production'][data-pose='message'] .character-art {
+  animation: bruno-message-breathe 1.6s ease-in-out infinite;
+}
+.character-layer[data-asset='production'][data-pose='reaction'] .character-art {
+  animation: bruno-reaction-pop .95s cubic-bezier(.2,.9,.25,1) both;
+}
+.character-layer[data-asset='production'][data-pose='exit'] .character-art {
+  animation: bruno-talk-bob 1.1s ease-in-out infinite;
+}
+.character-layer[data-asset='production'][data-pose='wave'] .character-art {
+  animation: bruno-whole-body-wave 1.1s ease-in-out both;
+}
+.character-layer[data-asset='production'][data-pose='wink'] .character-art {
+  animation: bruno-wink-beat .65s ease-in-out both;
+}
+.character-layer[data-asset='production'][data-pose='turn'] .character-art {
+  animation: bruno-turn-away .75s ease-in-out both;
+}
+.character-layer[data-asset='production'][data-pose='depart'] .character-art {
+  animation: bruno-depart 1.5s cubic-bezier(.3,.05,.7,.2) both;
+}
+
+@keyframes bruno-cap-arrive {
+  0% { transform: translateY(24%) scale(.78); opacity: .15; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes bruno-eyes-rise {
+  0% { transform: translateY(14%) scale(.9); }
+  55% { transform: translateY(-2%) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes bruno-peek-in {
+  0% { transform: translateX(16%) rotate(-5deg) scale(.94); }
+  60% { transform: translateX(-2%) rotate(1.5deg) scale(1.02); }
+  100% { transform: translateX(0) rotate(0) scale(1); }
+}
+@keyframes bruno-paw-press {
+  0% { transform: translateY(0) scale(.96); }
+  48% { transform: translateY(-1%) scale(1.11); }
+  72% { transform: translateY(0) scale(1.07); }
+  100% { transform: translateY(0) scale(1.03); }
+}
+@keyframes bruno-talk-bob {
+  0%,100% { transform: translateY(0) rotate(0) scale(1); }
+  25% { transform: translateY(-1.5%) rotate(-.7deg) scale(1.012); }
+  55% { transform: translateY(.5%) rotate(.5deg) scale(.995); }
+  78% { transform: translateY(-.8%) rotate(.4deg) scale(1.006); }
+}
+@keyframes bruno-message-breathe {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1.8%) scale(1.018); }
+}
+@keyframes bruno-reaction-pop {
+  0% { transform: scale(1); }
+  40% { transform: translateY(-3%) scale(1.06) rotate(-1deg); }
+  70% { transform: translateY(1%) scale(.99) rotate(1deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes bruno-whole-body-wave {
+  0%,100% { transform: rotate(0) translateY(0); }
+  22% { transform: rotate(-4deg) translateY(-1.5%); }
+  48% { transform: rotate(4deg) translateY(-2%); }
+  72% { transform: rotate(-3deg) translateY(-1%); }
+}
+@keyframes bruno-wink-beat {
+  0%,100% { transform: rotate(0) scale(1); }
+  45% { transform: rotate(-3deg) scale(1.025); }
+  70% { transform: rotate(1deg) scale(1.01); }
+}
+@keyframes bruno-turn-away {
+  0% { transform: perspective(800px) rotateY(0) translateX(0) scale(1); opacity: 1; }
+  100% { transform: perspective(800px) rotateY(-22deg) translateX(8%) scale(.92); opacity: .92; }
+}
+@keyframes bruno-depart {
+  0% { transform: translate(0,0) scale(.92); opacity: .95; }
+  55% { transform: translate(10%,-2%) scale(.76); opacity: .75; }
+  100% { transform: translate(22%,-5%) scale(.58); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-layer[data-asset='production'] .character-art {
+    animation: none !important;
+    transform: none !important;
+  }
+}
