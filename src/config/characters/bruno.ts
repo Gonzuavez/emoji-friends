@@ -1,10 +1,11 @@
 export type BrunoPose = 'capPeek' | 'eyesRise' | 'peek' | 'paw' | 'recognition' | 'introduction' | 'message' | 'reaction' | 'exit' | 'wave' | 'wink' | 'turn' | 'depart';
 export interface BrunoCharacterConfig {
   name: string;
+  branding: string;
   image?: string;
   // Optional approved pose art. Missing/broken poses fall back to the base PNG.
   poseImages?: Partial<Record<BrunoPose, string>>;
-  voice: { id: string; language: string; direction: string };
+  voice: { id: string; name: string; provider: 'heygen'; language: string; direction: string };
 }
 export interface EmotionalProp {
   image: string;
@@ -17,10 +18,13 @@ export interface EmotionalProp {
  */
 export const bruno: BrunoCharacterConfig = {
   name: 'Bruno',
+  branding: 'Bruno paw-heart',
   image: '/characters/bruno/bruno.png',
   poseImages: {},
   voice: {
-    id: 'bruno-en-v1',
+    id: 'M9QQyAAoUtDSmALeZnRw',
+    name: 'BRUNOJI',
+    provider: 'heygen',
     language: 'en',
     direction: 'Youthful (8–10-year-old character feel), light, warm, cheerful, curious, playful, gentle, expressive and natural. Family-friendly; never shrill, deep, adult, announcer-like or corporate.',
   },

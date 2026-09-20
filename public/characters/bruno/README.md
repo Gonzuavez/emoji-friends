@@ -6,7 +6,7 @@ No production art is committed. The monochrome Work Order #001 stand-in remains 
 
 Place the approved transparent PNG at **`public/characters/bruno/bruno.png`**. The configured URL is already `/characters/bruno/bruno.png`; adding the file and rebuilding is sufficient. Use an RGBA portrait canvas (2:3 recommended), centered character, head/cap toward the upper edge, and clear space around the paws. Alpha edges are preserved with `object-fit: contain`, no background, and no production-image mask. Test cropping on the real artwork before sign-off. An image still loading or failing to load keeps the existing stand-in visible.
 
-Locked identity: warm brown fluffy teddy bear, oversized round head, tiny chibi body, enormous glossy amber-brown eyes, black ADYD cap, black ADYD hoodie, and backpack when appropriate. Nothing in this work order redesigns that identity.
+Locked identity: warm brown fluffy teddy bear, oversized round head, tiny chibi body, enormous glossy amber-brown eyes, cap and hoodie with the approved **Bruno paw-heart branding (not ADYD branding)**, and backpack when appropriate. Nothing in this work order redesigns that identity.
 
 ## Approved performance / optional pose assets
 
@@ -27,4 +27,4 @@ Use the same canvas and character anchor for every pose. Configure public URLs (
 
 ## Occasion prop
 
-The gift configuration has `prop: null` by default. Bruno does not permanently carry a heart. An occasion may provide `{ image: '/characters/bruno/approved-prop.png', description: '...', showDuring: ['message', 'reaction'] }` after that prop is approved. The optional transparent overlay is hidden outside those poses and omitted on load failure. The heart in the final text reveal is part of the approved message, not a character prop.
+The gift configuration has `prop: null` by default. Bruno does not permanently carry a heart. The locked paw-heart brand mark is part of his approved identity; it is separate from an occasion-specific emotional prop. An occasion may provide `{ image: '/characters/bruno/approved-prop.png', description: '...', showDuring: ['message', 'reaction'] }` after that prop is approved. The optional transparent overlay is hidden outside those poses and omitted on load failure. The heart in the final text reveal is part of the approved message, not a character prop.

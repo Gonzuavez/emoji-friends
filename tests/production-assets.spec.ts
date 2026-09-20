@@ -59,7 +59,8 @@ async function reachRecognition(page: Page) {
 test('canonical production paths and voice identity are configured', async () => {
   expect(brunoThinkingOfYou.character).toEqual(bruno);
   expect(brunoThinkingOfYou.prop).toBeNull();
-  expect(bruno.voice.id).toBe('bruno-en-v1');
+  expect(bruno.branding).toBe('Bruno paw-heart');
+  expect(bruno.voice).toMatchObject({ name: 'BRUNOJI', provider: 'heygen', id: 'M9QQyAAoUtDSmALeZnRw', language: 'en' });
   expect(bruno.image).toBe('/characters/bruno/bruno.png');
   expect(brunoThinkingOfYou.audio).toEqual({
     recognition: '/audio/bruno-recognition.mp3', introduction: '/audio/bruno-introduction.mp3',

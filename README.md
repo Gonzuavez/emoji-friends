@@ -67,7 +67,7 @@ Tests run against the production build, so run `npm run build` first. They cover
 - `src/experiences/BrunoThinkingOfYou/`: explicit, centralized timeline and lifecycle hook. The caption-only sequence runs for roughly 35 seconds: dark opening/knocks, cap peek, eyes rise, full peek, paw press, recognition/introduction/message, warm reaction, exit line, wave, wink, turn, departure, and CTA. Real clips extend beats when needed. Longer captions receive more reading time. Replay returns to the initial tap and cleans up prior playback. Pause/resume restarts the current beat; hiding the tab pauses until the user resumes.
 - `src/components/stage/`: immersive glass/stage layer. CSS uses safe-area insets, responsive layouts, and reduced-motion overrides. Short/landscape screens scroll vertically so controls remain reachable.
 - `src/components/character/BrunoCharacter.tsx`: production PNG/optional pose adapter with the original, explicitly labeled stand-in on missing/failed assets. Pose names come from the existing timeline; future Rive integration stays in this layer. An optional gift-level prop is shown only during configured poses, never permanently attached to Bruno.
-- `src/config/characters/bruno.ts`: approved image path, optional pose mappings, canonical `bruno-en-v1` English voice identity/direction, and the four local demo clip URLs.
+- `src/config/characters/bruno.ts`: approved image path, optional pose mappings, locked canonical HeyGen voice **BRUNOJI** (`M9QQyAAoUtDSmALeZnRw`), English voice direction, and the four local demo clip URLs.
 - `src/audio/ExperienceAudio.ts`: gesture-unlocked Web Audio, three soft synthesized knocks, bounded preload/decode, actual clip-completion timing, cancellation, and silent fallback. Dialogue is always captioned. Sound and pause controls appear during playback.
 
 ## Production files still needed
@@ -79,6 +79,8 @@ No approved production image or voice file is physically present. Add these exac
 - `public/audio/bruno-introduction.mp3`
 - `public/audio/bruno-message.mp3`
 - `public/audio/bruno-exit.mp3`
+
+The production identity is locked to the approved Bruno bear with **Bruno paw-heart branding**, not ADYD character branding. ADYD Ventures remains the platform owner/copyright holder. The canonical voice is **BRUNOJI** on HeyGen, Voice ID `M9QQyAAoUtDSmALeZnRw`; the client only plays exported local clips.
 
 See [visual handoff](public/characters/bruno/README.md) for the locked identity, transparent-canvas requirements, optional pose files for the approved wave/wink/backpack departure, and occasion prop configuration. See [voice handoff](public/audio/README.md) for the exact four scripts and canonical voice direction. No replacement artwork or voice has been invented. `prop: null` is the default; a heart is not part of Bruno’s permanent character design.
 
