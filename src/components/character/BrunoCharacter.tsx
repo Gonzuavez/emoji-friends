@@ -8,7 +8,7 @@ type DisplayFrame = {
   pose: Phase;
 };
 
-const POSE_BLEND_MS = 320;
+const POSE_BLEND_MS = 430;
 const hiddenPhases = new Set<Phase>(['idle', 'opening', 'knock1', 'knock2', 'knock3', 'cta']);
 
 function isVisiblePhase(phase: Phase) {
@@ -26,6 +26,7 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
     () => character.image ? { image: character.image, pose: phase } : null,
   );
   const [outgoingFrame, setOutgoingFrame] = useState<DisplayFrame | null>(null);
+  const [transitionFrom, setTransitionFrom] = useState<Phase | null>(null);
   const transitionTimer = useRef<number | null>(null);
 
   const pose = phase as BrunoPose;
@@ -84,12 +85,15 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
     if (!desiredImage) {
       setActiveFrame(null);
       setOutgoingFrame(null);
+      setTransitionFrom(null);
+      setTransitionFrom(null);
       return;
     }
 
     if (failedUrls.has(desiredImage)) {
       setActiveFrame(null);
       setOutgoingFrame(null);
+      setTransitionFrom(null);
       return;
     }
 
@@ -100,14 +104,16 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
 
       if (activeFrame?.image === desiredImage) {
         if (activeFrame.pose !== phase) {
-          // Same artwork can represent more than one beat (for example turn /
-          // depart). Re-key it by pose so that beat-specific motion restarts.
+          // Keep the same DOM image when adjacent beats reuse the same artwork.
+          // Only the choreography changes, so there is no visible re-mount.
+          setTransitionFrom(activeFrame.pose);
           setActiveFrame({ image: desiredImage, pose: phase });
         }
         return;
       }
 
       const canBlend = Boolean(activeFrame && visible && isVisiblePhase(activeFrame.pose));
+      setTransitionFrom(canBlend && activeFrame ? activeFrame.pose : null);
       setOutgoingFrame(canBlend ? activeFrame : null);
       setActiveFrame({ image: desiredImage, pose: phase });
 
@@ -173,6 +179,7 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
     data-pose={phase}
     data-asset={hasProductionFrame || productionPending ? 'production' : 'fallback'}
     data-transitioning={outgoingImage ? 'true' : 'false'}
+    data-from-pose={transitionFrom ?? ''}
     aria-hidden="true"
   >
     <div className="character-aura" />
@@ -190,7 +197,7 @@ export function BrunoCharacter({ phase, character, prop }: { phase: Phase; chara
       />}
       {activeImage && activeFrame && <img
         className="character-art character-art--current"
-        key={`current:${activeFrame.image}:${activeFrame.pose}`}
+        key={`current:${activeFrame.image}`}
         src={activeImage}
         data-image-pose={activeFrame.pose}
         alt=""
