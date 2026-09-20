@@ -24,7 +24,7 @@ export function BrunoThinkingOfYou({ gift }: { gift: Gift }) {
       <button className="primary" ref={openButton} disabled={phase !== 'idle'} onClick={start}>Open it <span aria-hidden="true">↗</span></button>
       <p className="sound-note">Sound makes it sweeter. Quiet is lovely, too.</p>
     </section>}
-    <BrunoCharacter character={gift.character} phase={phase} />
+    <BrunoCharacter character={gift.character} prop={gift.prop} phase={phase} />
     <div className="dialogue" role="status" aria-live="polite" aria-atomic="true">
       {caption(phase, gift) && <div key={phase} className="dialogue-line">
         <p className="eyebrow">{phase === 'message' ? `A little something from ${gift.senderName}` : gift.character.name}</p>

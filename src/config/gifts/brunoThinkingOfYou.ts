@@ -1,9 +1,12 @@
+import { bruno, brunoDemoAudio, type BrunoCharacterConfig, type EmotionalProp } from '../characters/bruno';
+
 export interface Gift {
   id: string;
   senderName: string;
   recipientName: string;
   message: string;
-  character: { name: string; image?: string };
+  character: BrunoCharacterConfig;
+  prop: EmotionalProp | null;
   // Optional local recordings keyed to the dialogue cues. Captions always remain.
   audio: Partial<Record<'recognition' | 'introduction' | 'message' | 'exit', string>>;
 }
@@ -13,8 +16,10 @@ export const brunoThinkingOfYou: Gift = {
   senderName: 'Angel',
   recipientName: 'Leticia',
   message: 'Just a little reminder that someone is thinking about you today.',
-  character: { name: 'Bruno' },
-  audio: {},
+  character: bruno,
+  // Occasion-specific approved prop only; Bruno has no permanent heart.
+  prop: null,
+  audio: brunoDemoAudio,
 };
 
 export const copy = {

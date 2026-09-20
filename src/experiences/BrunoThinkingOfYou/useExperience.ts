@@ -13,13 +13,19 @@ export function useExperience(gift: Gift) {
 
   useEffect(() => {
     if (index < 0 || index >= timeline.length || paused) return;
-    audio.current.play(phase, gift);
-    const timer = window.setTimeout(() => setIndex(value => value + 1), durationFor(index, gift));
-    return () => { window.clearTimeout(timer); audio.current.stop(); };
+    let cancelled = false;
+    let timer: number;
+    const readingTime = new Promise<void>(resolve => { timer = window.setTimeout(resolve, durationFor(index, gift)); });
+    // The beat finishes only after both readable captions and actual speech.
+    void Promise.all([readingTime, audio.current.play(phase, gift)]).then(() => {
+      if (!cancelled) setIndex(value => value + 1);
+    });
+    return () => { cancelled = true; window.clearTimeout(timer); audio.current.stop(); };
   }, [index, phase, gift, paused]);
 
   useEffect(() => {
     const controller = audio.current;
+    controller.onInterrupted = () => setPaused(true);
     return () => controller.dispose();
   }, []);
 
@@ -32,12 +38,15 @@ export function useExperience(gift: Gift) {
   }, []);
 
   function start() {
-    void audio.current.unlock().then(available => setAudioUnavailable(!available));
+    void audio.current.unlock().then(available => {
+      setAudioUnavailable(!available);
+      if (available) audio.current.preload(gift);
+    });
     setPaused(false);
     setIndex(0);
   }
   function replay() {
-    audio.current.stop();
+    audio.current.reset();
     setPaused(false);
     setIndex(-1);
   }
@@ -45,5 +54,10 @@ export function useExperience(gift: Gift) {
     audio.current.setMuted(!muted);
     setMuted(!muted);
   }
-  return { phase, paused, muted, audioUnavailable, start, replay, toggleMute, togglePause: () => setPaused(value => !value) };
+  function togglePause() {
+    if (paused) {
+      void audio.current.unlock().then(available => { setAudioUnavailable(!available); setPaused(false); });
+    } else setPaused(true);
+  }
+  return { phase, paused, muted, audioUnavailable, start, replay, toggleMute, togglePause };
 }
