@@ -207,3 +207,30 @@ test('audio interruption pauses and resumes the same caption safely', async ({ p
   await page.clock.runFor(8250);
   await expect(page.locator('main')).toHaveAttribute('data-phase', 'introduction');
 });
+
+
+test('standalone Bruno poses overlap briefly instead of hard-swapping', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open it' }).click();
+
+  for (const [index, step] of timeline.entries()) {
+    await expect(page.locator('main')).toHaveAttribute('data-phase', step.id);
+    if (step.id === 'capPeek') break;
+    await page.clock.runFor(durationFor(index, brunoThinkingOfYou));
+  }
+
+  const current = page.locator('.character-art--current');
+  await expect(current).toHaveAttribute('src', '/characters/bruno/poses/bruno-peek.png');
+
+  const capPeekIndex = timeline.findIndex(step => step.id === 'capPeek');
+  await page.clock.runFor(durationFor(capPeekIndex, brunoThinkingOfYou));
+  await expect(page.locator('main')).toHaveAttribute('data-phase', 'eyesRise');
+  await expect(current).toHaveAttribute('src', '/characters/bruno/poses/bruno-rising.png');
+  await expect(page.locator('.character-art--outgoing')).toHaveAttribute('src', '/characters/bruno/poses/bruno-peek.png');
+  await expect(page.locator('.character-layer')).toHaveAttribute('data-transitioning', 'true');
+
+  await page.clock.runFor(350);
+  await expect(page.locator('.character-art--outgoing')).toHaveCount(0);
+  await expect(page.locator('.character-layer')).toHaveAttribute('data-transitioning', 'false');
+});
