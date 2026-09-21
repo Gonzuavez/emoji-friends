@@ -1,3 +1,4 @@
+import { MouthDriver } from '../lib/audio/mouthEnvelope';
 import type { Gift } from '../config/gifts/brunoThinkingOfYou';
 import { isDialogue, type Phase } from '../experiences/BrunoThinkingOfYou/timeline';
 
@@ -7,6 +8,8 @@ export const audioTiming = { loadTimeout: 2500, endPadding: 250, stallGrace: 150
  * lifetime; no network/decode/playback failure can strand the performance.
  */
 export class ExperienceAudio {
+  readonly mouth = new MouthDriver();
+  private analyser?: AnalyserNode;
   private context?: AudioContext;
   private output?: GainNode;
   private muted = false;
@@ -90,7 +93,15 @@ export class ExperienceAudio {
     await new Promise<void>(resolve => {
       const source = context.createBufferSource();
       source.buffer = buffer;
-      source.connect(this.output!);
+      // Read speech before the master gain: mute does not stop articulation.
+      // Older/limited audio contexts can still play without analysis support.
+      try {
+        this.analyser ??= context.createAnalyser();
+        this.analyser.fftSize = 512;
+        source.connect(this.analyser);
+        this.analyser.connect(this.output!);
+        this.mouth.start(this.analyser);
+      } catch { source.connect(this.output!); }
       let settled = false;
       let padding: number | undefined;
       let watchdog: number | undefined;
@@ -102,11 +113,13 @@ export class ExperienceAudio {
         source.onended = null;
         try { source.stop(); } catch { /* Already stopped or never started. */ }
         source.disconnect();
+        this.analyser?.disconnect();
+        this.mouth.stop();
         if (this.cancelPlayback === finish) this.cancelPlayback = undefined;
         resolve();
       };
       this.cancelPlayback = finish;
-      source.onended = () => { padding = window.setTimeout(finish, audioTiming.endPadding); };
+      source.onended = () => { this.mouth.stop(); padding = window.setTimeout(finish, audioTiming.endPadding); };
       // Handles OS interruptions or a browser that never dispatches ended.
       watchdog = window.setTimeout(finish, buffer.duration * 1000 + audioTiming.stallGrace);
       try { source.start(); } catch { finish(); }
@@ -133,6 +146,7 @@ export class ExperienceAudio {
 
   stop() {
     this.generation++;
+    this.mouth.stop(true);
     this.cancelPlayback?.();
     for (const oscillator of this.knocks) { try { oscillator.stop(); } catch { /* Finished. */ } }
     this.knocks.clear();
@@ -149,5 +163,6 @@ export class ExperienceAudio {
     void this.context?.close().catch(() => {});
     this.context = undefined;
     this.output = undefined;
+    this.analyser = undefined;
   }
 }
