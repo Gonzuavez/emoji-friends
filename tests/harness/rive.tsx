@@ -24,7 +24,9 @@ const loader: RuntimeLoader = async () => ({ types, create(options) {
     get value() { return stats.values[name] ?? 0; }, set value(value: number | boolean) { stats.values[name] = value; },
     fire() { stats.triggers.push(name); },
   }));
-  setTimeout(() => { if (alive) { options.onLoad(); setTimeout(() => { if (alive) options.onAdvance(); }, 10); } }, scenario === 'late' ? 1000 : 20);
+  const completeLoad = () => { if (alive) { options.onLoad(); setTimeout(() => { if (alive) options.onAdvance(); }, 10); } };
+  if (scenario === 'late') Object.assign(window, { completeRiveLoad: completeLoad });
+  else setTimeout(completeLoad, 20);
   Object.assign(window, { failRive: options.onError });
   return {
     contents: { artboards: [{ name: scenario === 'wrong-artboard' ? 'Other' : 'Bruno', stateMachines: [{ name: 'BrunoStateMachine' }] }] },

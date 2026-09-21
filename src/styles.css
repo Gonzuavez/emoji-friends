@@ -238,6 +238,8 @@ a { color: #efd7b5; }
    Only switch renderers during the black opening, never over a visible PNG. */
 .rive-character canvas { display: block; width: 100%; height: 100%; }
 .rive-character { transition: opacity .25s; }
+/* Orchestration wrappers must not create extra stage grid rows. */
+[data-bruno-renderer], .png-renderer { display: contents; }
 .png-renderer[hidden] { display: none; }
 .stage:is([data-phase='opening'], [data-phase='knock1'], [data-phase='knock2'], [data-phase='knock3']) { background: #000; }
 .stage:is([data-phase='opening'], [data-phase='knock1'], [data-phase='knock2'], [data-phase='knock3']) .ambient { opacity: 0; }

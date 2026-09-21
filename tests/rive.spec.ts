@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { brunoStateMap, BrunoStateDriver, requiredInputs, validateInputs } from '../src/lib/rive/brunoStateMap';
 import { MouthEnvelope } from '../src/lib/audio/mouthEnvelope';
-import { timeline } from '../src/experiences/BrunoThinkingOfYou/timeline';
+import { durationFor, timeline } from '../src/experiences/BrunoThinkingOfYou/timeline';
+import { brunoThinkingOfYou } from '../src/config/gifts/brunoThinkingOfYou';
 import { installAudio } from './helpers/audio';
 
 test('every phase has the correct declarative Rive action and entry-only triggers', () => {
@@ -108,6 +109,8 @@ test('late runtime readiness waits for replay and reduced motion always retains 
   await page.route('**/rive/bruno/bruno.riv', route => route.fulfill({ body: 'RIVE-test-double' }));
   await page.goto('http://127.0.0.1:4174/tests/harness/index.html?scenario=late');
   await page.getByRole('button', { name: 'message', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { completeRiveLoad?: () => void }).completeRiveLoad)).toBe('function');
+  await page.evaluate(() => (window as unknown as { completeRiveLoad(): void }).completeRiveLoad());
   await expect.poll(() => page.evaluate(() => (window as unknown as { riveStats: { values: Record<string, unknown> } }).riveStats.values.showBruno)).toBe(false);
   await expect(page.locator('[data-bruno-renderer]')).toHaveAttribute('data-bruno-renderer', 'png');
   await page.getByRole('button', { name: 'idle', exact: true }).click();
@@ -135,17 +138,21 @@ test('actual BRUNOJI speech drives the mouth before mute gain and closes on stop
 
 test('speaking layout preserves caption and control space at all required sizes', async ({ page }) => {
   await installAudio(page, .1);
-  await page.clock.install();
+  const fixedTime = new Date('2026-01-01T00:00:00Z');
+  await page.clock.install({ time: fixedTime });
+  await page.clock.pauseAt(fixedTime);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open it' }).click();
+  await expect(page.locator('main')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+  for (const [index, step] of timeline.entries()) {
+    if (step.id === 'message') break;
+    await expect(page.locator('main')).toHaveAttribute('data-phase', step.id);
+    await page.clock.runFor(durationFor(index, brunoThinkingOfYou));
+  }
+  await expect(page.locator('main')).toHaveAttribute('data-phase', 'message');
+  await page.getByRole('button', { name: 'Pause experience' }).click();
   for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 412, height: 915 }, { width: 1280, height: 720 }, { width: 844, height: 390 }]) {
     await page.setViewportSize(viewport);
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Open it' }).click();
-    await expect(page.locator('main')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
-    for (const step of timeline) {
-      if (step.id === 'message') break;
-      await page.clock.runFor(step.duration);
-    }
-    await expect(page.locator('main')).toHaveAttribute('data-phase', 'message');
     const character = await page.locator('.character-layer').boundingBox();
     const caption = await page.locator('.dialogue').boundingBox();
     const controls = await page.locator('.playback-controls').boundingBox();
