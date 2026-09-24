@@ -4,7 +4,7 @@ Emoji Friends now has a server-side fal.ai integration for Kling AI Avatar v2 Pr
 
 ## Endpoint
 
-`POST /api/fal/avatar`
+`POST /.netlify/functions/fal-avatar`
 
 Required headers:
 
@@ -27,13 +27,13 @@ The response includes a fal `request_id`.
 
 ## Poll status
 
-`GET /api/fal/avatar?action=status&requestId=<id>`
+`GET /.netlify/functions/fal-avatar?action=status&requestId=<id>`
 
 Use the same `x-emoji-fal-token` header.
 
 ## Fetch result
 
-`GET /api/fal/avatar?action=result&requestId=<id>`
+`GET /.netlify/functions/fal-avatar?action=result&requestId=<id>`
 
 When complete, fal returns the generated video URL.
 
