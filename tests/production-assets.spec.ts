@@ -10,8 +10,9 @@ const pixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQ
 async function stats(page: Page) {
   return page.evaluate(() => (window as unknown as { audioStats: { starts: number; stops: number; active: number; ended: number; gain: number; resumes: number } }).audioStats);
 }
-async function reachRecognition(page: Page) {
+async function reachRecognition(page: Page, beforeAdvance?: () => Promise<void>) {
   await page.getByRole('button', { name: 'Open it' }).click();
+  await beforeAdvance?.();
   for (const [index, step] of timeline.entries()) {
     if (step.id === 'recognition') break;
     await page.clock.runFor(durationFor(index, brunoThinkingOfYou));
@@ -168,8 +169,12 @@ test('real Web Audio decodes a local clip and ends before advancing', async ({ p
   wav.write('data', 36); wav.writeUInt32LE(sampleCount * 2, 40);
   await page.route('**/audio/bruno-*.mp3', route => route.fulfill({ contentType: 'audio/wav', body: wav }));
   await page.addInitScript(() => {
-    const stats = { started: 0, ended: 0 };
+    const stats = { started: 0, ended: 0, decoded: 0 };
     Object.assign(window, { realAudioStats: stats });
+    const decode = AudioContext.prototype.decodeAudioData;
+    AudioContext.prototype.decodeAudioData = function (data: ArrayBuffer) {
+      return decode.call(this, data).then(buffer => { stats.decoded++; return buffer; });
+    };
     const start = AudioBufferSourceNode.prototype.start;
     AudioBufferSourceNode.prototype.start = function (...args: Parameters<typeof start>) {
       stats.started++;
@@ -177,9 +182,14 @@ test('real Web Audio decodes a local clip and ends before advancing', async ({ p
       return start.apply(this, args);
     };
   });
-  await page.clock.install();
+  const fixedTime = new Date('2026-01-01T00:00:00Z');
+  await page.clock.install({ time: fixedTime });
+  await page.clock.pauseAt(fixedTime);
   await page.goto('/');
-  await reachRecognition(page);
+  await reachRecognition(page, async () => {
+    // Native decoding uses real time; never race it against a simulated load budget.
+    await expect.poll(() => page.evaluate(() => (window as unknown as { realAudioStats: { decoded: number } }).realAudioStats.decoded)).toBe(4);
+  });
   await expect.poll(() => page.evaluate(() => (window as unknown as { realAudioStats: { ended: number } }).realAudioStats.ended)).toBe(1);
   await expect(page.locator('main')).toHaveAttribute('data-phase', 'recognition');
   await page.clock.runFor(durationFor(timeline.findIndex(step => step.id === 'recognition'), brunoThinkingOfYou));

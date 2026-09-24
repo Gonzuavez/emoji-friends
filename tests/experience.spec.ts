@@ -13,6 +13,9 @@ test('complete gift, send notice, and clean replay without browser errors', asyn
   await page.goto('/g/bruno-thinking-of-you');
   await expect(page.getByRole('heading', { name: 'Someone sent you a little something…' })).toBeVisible();
   await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('arrival.png') });
+  const openingStage = await page.locator('main').boundingBox();
+  const arrival = await page.locator('.arrival').boundingBox();
+  expect(Math.abs(arrival!.y + arrival!.height / 2 - (openingStage!.y + openingStage!.height / 2))).toBeLessThan(2);
   await page.getByRole('button', { name: 'Open it' }).click();
   for (const [index, step] of timeline.entries()) {
     await expect(page.locator('main')).toHaveAttribute('data-phase', step.id);
@@ -33,6 +36,9 @@ test('complete gift, send notice, and clean replay without browser errors', asyn
   await expect(send).toBeVisible();
   await expect(send).toBeFocused();
   await page.screenshot({ animations: 'disabled', path: testInfo.outputPath('reveal.png') });
+  const endingStage = await page.locator('main').boundingBox();
+  const ending = await page.locator('.ending').boundingBox();
+  expect(Math.abs(ending!.y + ending!.height / 2 - (endingStage!.y + endingStage!.height / 2))).toBeLessThan(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await send.click();
   await expect(page.getByText('Bruno’s first little outing. Sending your own gift is coming next.')).toBeVisible();

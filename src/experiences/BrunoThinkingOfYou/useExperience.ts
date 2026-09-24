@@ -4,6 +4,7 @@ import { ExperienceAudio } from '../../audio/ExperienceAudio';
 import { durationFor, timeline, type Phase } from './timeline';
 
 export function useExperience(gift: Gift) {
+  const [riveActive, setRiveActive] = useState(false);
   const [index, setIndex] = useState(-1);
   const [paused, setPaused] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -11,17 +12,21 @@ export function useExperience(gift: Gift) {
   const audio = useRef(new ExperienceAudio());
   const phase: Phase = index < 0 ? 'idle' : index >= timeline.length ? 'cta' : timeline[index].id;
 
+  const beatDuration = index >= 0 && index < timeline.length
+    ? phase === 'depart' && riveActive ? 3000 : durationFor(index, gift)
+    : 0;
+
   useEffect(() => {
     if (index < 0 || index >= timeline.length || paused) return;
     let cancelled = false;
     let timer: number;
-    const readingTime = new Promise<void>(resolve => { timer = window.setTimeout(resolve, durationFor(index, gift)); });
+    const readingTime = new Promise<void>(resolve => { timer = window.setTimeout(resolve, beatDuration); });
     // The beat finishes only after both readable captions and actual speech.
     void Promise.all([readingTime, audio.current.play(phase, gift)]).then(() => {
       if (!cancelled) setIndex(value => value + 1);
     });
     return () => { cancelled = true; window.clearTimeout(timer); audio.current.stop(); };
-  }, [index, phase, gift, paused]);
+  }, [index, phase, gift, paused, beatDuration]);
 
   useEffect(() => {
     const controller = audio.current;
@@ -59,5 +64,5 @@ export function useExperience(gift: Gift) {
       void audio.current.unlock().then(available => { setAudioUnavailable(!available); setPaused(false); });
     } else setPaused(true);
   }
-  return { phase, paused, muted, audioUnavailable, start, replay, toggleMute, togglePause };
+  return { mouth: audio.current.mouth, setRiveActive, phase, paused, muted, audioUnavailable, start, replay, toggleMute, togglePause };
 }

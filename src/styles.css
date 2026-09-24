@@ -18,8 +18,8 @@ h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size
 .primary:hover { background: #ffe8c7; }
 .primary span { font-size: 18px; font-weight: 400; }
 .sound-note { font-size: 10px; color: #9a9d90; margin-top: 23px; }
-.character-layer { position: absolute; pointer-events: none; width: min(90vw, 410px); height: min(53svh, 440px); top: 8svh; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity .7s; }
-.character-layer.is-visible { opacity: 1; }
+.character-layer, .rive-character { position: absolute; pointer-events: none; width: min(90vw, 410px); height: min(53svh, 440px); top: 8svh; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity .7s; }
+.character-layer.is-visible, .rive-character.is-visible { opacity: 1; }
 .character-aura { position: absolute; inset: 5% -30% -10%; background: radial-gradient(ellipse, #bda07719, transparent 64%); }
 .bear { width: 100%; height: 100%; transform: translateY(10%) scale(.92); transition: transform 1.3s ease, opacity .9s; mask-image: linear-gradient(#000 78%, transparent 99%); }
 .placeholder, .character-art { display: block; height: 100%; width: 100%; object-fit: contain; filter: drop-shadow(0 0 22px #c8a16a13); }
@@ -55,8 +55,8 @@ a { color: #efd7b5; }
 @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ripple { from { opacity: .7; transform: scale(.6); } to { opacity: 0; transform: scale(2.2); } }
 @keyframes wave { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(15deg); } }
-@media (min-width: 700px) { .character-layer { top: 7svh; } .dialogue { top: 65svh; } .arrival { max-width: 450px; } }
-@media (max-height: 650px) { .stage { min-height: 650px; } .character-layer { top: 30px; height: 300px; } .dialogue { top: 390px; } .arrival, .ending { padding: 20px 0; } .gift-mark { margin-bottom: 20px; } }
+@media (min-width: 700px) { .character-layer, .rive-character { top: 7svh; } .dialogue { top: 65svh; } .arrival { max-width: 450px; } }
+@media (max-height: 650px) { .stage { min-height: 650px; } .character-layer, .rive-character { top: 30px; height: 300px; } .dialogue { top: 390px; } .arrival, .ending { padding: 20px 0; } .gift-mark { margin-bottom: 20px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .bear, .glass-paw { transform: none !important; } .glass-ripple { opacity: .25; box-shadow: 0 0 40px #d5cbb83c; } }
 
 @media (prefers-reduced-motion: reduce) { .stage[data-phase='opening'] .arrival { visibility: hidden; } }
@@ -233,3 +233,13 @@ a { color: #efd7b5; }
 .character-layer[data-asset='production'][data-pose='peek'] .bear {
   clip-path: none !important;
 }
+
+/* Rive shares the existing stage bounds; the authored artboard owns articulation.
+   Only switch renderers during the black opening, never over a visible PNG. */
+.rive-character canvas { display: block; width: 100%; height: 100%; }
+.rive-character { transition: opacity .25s; }
+/* Orchestration wrappers must not create extra stage grid rows. */
+[data-bruno-renderer], .png-renderer { display: contents; }
+.png-renderer[hidden] { display: none; }
+.stage:is([data-phase='opening'], [data-phase='knock1'], [data-phase='knock2'], [data-phase='knock3']) { background: #000; }
+.stage:is([data-phase='opening'], [data-phase='knock1'], [data-phase='knock2'], [data-phase='knock3']) .ambient { opacity: 0; }

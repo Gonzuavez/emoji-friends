@@ -5,6 +5,7 @@ export interface BrunoCharacterConfig {
   image?: string;
   // Optional approved pose art. Missing/broken poses fall back to the base PNG.
   poseImages?: Partial<Record<BrunoPose, string>>;
+  rive?: { src: string; artboard: string; stateMachine: string };
   voice: { id: string; name: string; provider: 'heygen'; language: string; direction: string };
 }
 export interface EmotionalProp {
@@ -18,6 +19,7 @@ export interface EmotionalProp {
  */
 export const bruno: BrunoCharacterConfig = {
   name: 'Bruno',
+  rive: { src: '/rive/bruno/bruno.riv', artboard: 'Bruno', stateMachine: 'BrunoStateMachine' },
   branding: 'Bruno paw-heart',
   image: '/characters/bruno/bruno.png',
   // Every performance state uses a dedicated standalone PNG. The base image

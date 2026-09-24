@@ -3,7 +3,10 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   use: { baseURL: 'http://127.0.0.1:4173', trace: 'retain-on-failure' },
-  webServer: { command: 'npm run preview -- --port 4173', url: 'http://127.0.0.1:4173', reuseExistingServer: false },
+  webServer: [
+    { command: 'npm run preview -- --port 4173', url: 'http://127.0.0.1:4173', reuseExistingServer: false },
+    { command: 'npm run dev -- --port 4174', url: 'http://127.0.0.1:4174', reuseExistingServer: false },
+  ],
   projects: [
     { name: 'phone', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
     { name: 'android', use: { ...devices['Pixel 7'] } },

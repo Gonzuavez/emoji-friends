@@ -28,6 +28,7 @@ export async function installAudio(page: Page, duration = 8) {
       async resume() { stats.resumes++; this.state = 'running'; }
       async close() { this.state = 'closed'; }
       async decodeAudioData() { return { duration }; }
+      createAnalyser() { return { fftSize: 512, getFloatTimeDomainData(samples: Float32Array) { samples.fill(0.12); }, connect() { return this; }, disconnect() {} }; }
       createBufferSource() { return new Source(); }
       createGain() { return { gain: {
         set value(value: number) { stats.gain = value; },

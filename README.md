@@ -37,7 +37,7 @@ Build the magical recipient experience before accounts, payments, marketplace fe
 
 ## Technical direction
 
-Mobile-first web experience. Netlify will host the application. Supabase, Stripe, TTS, Rive, and premium AI-video integrations are intentionally deferred until the core experience is proven.
+Mobile-first web experience. Netlify will host the application. Supabase, Stripe, TTS, and premium AI-video services remain deferred. Optional Rive application integration is implemented in Pass #001; the authored character rig is a separate creative deliverable.
 
 © 2026 ADYD Ventures OÜ. All rights reserved.
 
@@ -66,7 +66,7 @@ Tests run against the production build, so run `npm run build` first. They cover
 - `src/config/gifts/brunoThinkingOfYou.ts`: typed gift data, all personalized copy, and async `loadGift(id)` boundary. Edit `senderName`, `recipientName`, and `message` here. The same `/g/:giftId` route and experience render every gift; the local loader can later be replaced with a data service.
 - `src/experiences/BrunoThinkingOfYou/`: explicit, centralized timeline and lifecycle hook. The caption-only sequence runs for roughly 35 seconds: dark opening/knocks, cap peek, eyes rise, full peek, paw press, recognition/introduction/message, warm reaction, exit line, wave, wink, turn, departure, and CTA. Real clips extend beats when needed. Longer captions receive more reading time. Replay returns to the initial tap and cleans up prior playback. Pause/resume restarts the current beat; hiding the tab pauses until the user resumes.
 - `src/components/stage/`: immersive glass/stage layer. CSS uses safe-area insets, responsive layouts, and reduced-motion overrides. Short/landscape screens scroll vertically so controls remain reachable.
-- `src/components/character/BrunoCharacter.tsx`: production PNG/optional pose adapter with the original, explicitly labeled stand-in on missing/failed assets. Pose names come from the existing timeline; future Rive integration stays in this layer. An optional gift-level prop is shown only during configured poses, never permanently attached to Bruno.
+- `src/components/character/BrunoCharacter.tsx`: optional Rive/PNG orchestration, with the stable PNG implementation in `BrunoPngCharacter.tsx` and original explicitly labeled stand-in on missing/failed artwork. Pose names come from the existing timeline. An optional gift-level prop is shown only during configured poses, never permanently attached to Bruno.
 - `src/config/characters/bruno.ts`: approved image path, optional pose mappings, locked canonical HeyGen voice **BRUNOJI** (`M9QQyAAoUtDSmALeZnRw`), English voice direction, and the four local demo clip URLs.
 - `src/audio/ExperienceAudio.ts`: gesture-unlocked Web Audio, three soft synthesized knocks, bounded preload/decode, actual clip-completion timing, cancellation, and silent fallback. Dialogue is always captioned. Sound and pause controls appear during playback.
 
@@ -82,7 +82,7 @@ The approved `Brunoji.png` master and all four files from `Bruno_BRUNOJI_Audio_P
 
 The production identity is locked to the approved Bruno bear with **Bruno paw-heart branding**, not ADYD character branding. ADYD Ventures remains the platform owner/copyright holder. The canonical voice is **BRUNOJI** on HeyGen, Voice ID `M9QQyAAoUtDSmALeZnRw`; the client only plays exported local clips.
 
-All visible character beats reuse this one approved master. Cap/eyes/peek use CSS reveals; paw uses a closer scale with subtle contact highlights; speaking/reaction hold or gently approach; wave uses sway; wink holds the master; turn/departure use perspective, recession and fade. No dedicated wink or rear-view artwork is fabricated.
+Merged main supplies the approved standalone pose pack in `public/characters/bruno/poses/`. Cap/peek, rising, paw/glass, hello, master, talking, wave, wink and exit PNGs map to their established performance beats; the stable CSS treatment and preload/failure behavior remain intact. The base master is retained outside configured performance poses. No artwork is generated or changed by the Rive pass.
 
 See [visual handoff](public/characters/bruno/README.md) for the locked identity, transparent-canvas requirements, optional pose files for the approved wave/wink/backpack departure, and occasion prop configuration. See [voice handoff](public/audio/README.md) for the exact four scripts and canonical voice direction. No replacement artwork or voice has been invented. `prop: null` is the default; a heart is not part of Bruno’s permanent character design.
 
@@ -100,12 +100,43 @@ Run `npm ci`, `npm run build`, then `npm test`. The browser suite covers the ori
 
 ## Netlify preview handoff
 
-The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. The dedicated `emoji-friends` Netlify project belongs to the A.N.G.E.L.S team and is connected only to `Gonzuavez/emoji-friends`. Pull requests build as Deploy Previews; PR #4 remains open for review.
+The existing `netlify.toml` is unchanged: Node 22, `npm run build`, publish `dist`, SPA rewrite for `/g/:giftId`. No environment variables are needed. The dedicated `emoji-friends` Netlify project belongs to the A.N.G.E.L.S team and is connected only to `Gonzuavez/emoji-friends`. Pull requests build as Deploy Previews; PR #4 has merged into main. The Rive pass uses a separate draft PR.
 
-Use the successful Deploy Preview link attached to PR #4 or open the [Emoji Friends deploy dashboard](https://app.netlify.com/projects/emoji-friends/deploys). The existing A.N.G.E.L.S website/project is separate and unchanged. Keep the checked-in build settings; do not merge the PR to test it. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. The preview uses the supplied real master and BRUNOJI recordings; missing or failed assets still fall back gracefully. Do not promote to production until reviewed.
+Use the successful Deploy Preview link attached to the current draft PR or open the [Emoji Friends deploy dashboard](https://app.netlify.com/projects/emoji-friends/deploys). The existing A.N.G.E.L.S website/project is separate and unchanged. Keep the checked-in build settings; do not merge the PR to test it. Open `/g/bruno-thinking-of-you` on the resulting HTTPS preview URL. The preview uses the supplied real master and BRUNOJI recordings; missing or failed assets still fall back gracefully. Do not promote to production until reviewed.
 
 ## Current limitations
 
-The supplied 1024×1536 RGBA master and its transparent edges are preserved unchanged. A static front-view PNG supports CSS reveals/approach/sway/departure, but cannot produce an articulated production paw, wink, or turn-and-walk animation with a backpack. Those pose hooks are ready; approved pose art or a later approved animation is still required for the full visual performance. Reduced motion presents the same ordered poses without animated movement.
+The supplied 1024×1536 RGBA master and its transparent edges are preserved unchanged. The approved standalone PNG poses remain static artwork with CSS motion. They do not supply a genuinely articulated body/face rig. The optional Rive runtime, state mapping and mouth signal are ready; a professionally authored `public/rive/bruno/bruno.riv` is required for true continuous articulated performance. Reduced motion presents the same ordered poses without animated movement.
 
 “Send Bruno to Someone” retains the coming-next notice; it does not create or send a gift. Only the local demo exists. Supabase, payments, authentication, sender builder, marketplace, analytics, paid TTS/video APIs, admin tools, and other characters remain out of scope.
+
+## Bruno Rive Integration Pass #001
+
+This pass is based on merged `main` and preserves its approved standalone PNG
+pose renderer in `BrunoPngCharacter.tsx`. `BrunoCharacter` now orchestrates a
+validated optional Rive renderer and that immediately available fallback.
+The official `@rive-app/react-canvas` runtime is lazy-loaded; no binary is
+statically imported and the production app works when `bruno.riv` is absent.
+
+The exact creative deliverable and input contract are documented in
+[the Rive authoring handoff](public/rive/bruno/README.md). Required location:
+`public/rive/bruno/bruno.riv`; artboard `Bruno`; machine `BrunoStateMachine`.
+No real authored Rive file is included, so true articulated Rive animation has
+not been visually verified. Approved PNGs remain the production renderer.
+The supplied HeyGen MP4 is a motion reference only, not shipped application media.
+
+Timeline mapping and entry guards live in `src/lib/rive/brunoStateMap.ts`.
+The mouth driver in `src/lib/audio/mouthEnvelope.ts` reads the existing BRUNOJI
+speech graph before mute gain, with normalization and attack/release smoothing.
+This implements amplitude-driven movement, not phoneme-perfect lip sync.
+Rive receives normalized samples via a subscription without per-frame React
+rerenders, new AudioContexts or duplicate speech sources. The website continues
+to own the black opening. Rive alone receives a 3-second departure beat; existing
+PNG timing and all approved MP3/PNG bytes are preserved.
+
+Validation uses `npm ci`, `npm run build`, `npm test`, `git diff --check`.
+Playwright tests the production build and a separate development-only runtime
+harness (never included in `dist`) to verify missing/invalid contract fallback,
+ready/late/error handoffs, one-shot triggers, mouth behavior and reduced motion.
+The new draft PR gets its own Deploy Preview in the existing Emoji Friends
+Netlify project. This pass must not be automatically merged.
